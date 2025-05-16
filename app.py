@@ -59,3 +59,5 @@ history = model.fit(
     validation_data=val_dataset,
     epochs=EPOCHS
 )
+
+model.save("model.keras")
