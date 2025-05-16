@@ -19,6 +19,7 @@ def preprocess_image(image_path, target_size=(224, 224)):
     image = img_to_array(image) / 255.0
     return np.expand_dims(image, axis=0)
 
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     prediction = None
