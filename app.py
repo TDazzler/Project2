@@ -52,6 +52,7 @@ model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.0001), loss="spars
 model.summary()
 
 
+
 EPOCHS = 10
 
 history = model.fit(
