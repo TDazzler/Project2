@@ -1,0 +1,21 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dog Breed Classifier</title>
+</head>
+<body>
+    <h1>Upload an Image</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" accept="image/*" required>
+        <button type="submit">Predict</button>
+    </form>
+
+    {% if filename %}
+        <h2>Uploaded Image:</h2>
+        <img src="{{ url_for('static', filename='uploads/' + filename) }}" width="300"><br><br>
+        <h2>Prediction: {{ prediction }}</h2>
+    {% endif %}
+</body>
+</html>
