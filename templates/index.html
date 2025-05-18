@@ -1,21 +1,134 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dog Breed Classifier</title>
-</head>
-<body>
-    <h1>Upload an Image</h1>
-    <form method="POST" enctype="multipart/form-data">
-        <input type="file" name="file" accept="image/*" required>
-        <button type="submit">Predict</button>
-    </form>
 
-    {% if filename %}
-        <h2>Uploaded Image:</h2>
-        <img src="{{ url_for('static', filename='uploads/' + filename) }}" width="300"><br><br>
-        <h2>Prediction: {{ prediction }}</h2>
-    {% endif %}
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- PWA Meta Tags -->
+<link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+<meta name="theme-color" content="#3B82F6">
+
+</head>
+<body class="bg-gray-100 text-gray-800 p-4">
+
+    <div class="max-w-md mx-auto bg-white rounded-xl shadow-md p-6">
+        <h1 class="text-2xl font-bold mb-4 text-center">Dog Breed Classifier</h1>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" name="file" id="fileInput" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:border file:rounded-lg file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+        </form>
+
+        <div id="previewContainer" class="mt-4 hidden">
+            <img id="preview" class="w-full rounded-lg shadow mb-4" />
+        </div>
+    </div>
+
+    
+
+    <script>
+        let chartInstance = null;
+
+        document.getElementById("fileInput").addEventListener("change", function () {
+            const file = this.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const preview = document.getElementById("preview");
+                preview.src = e.target.result;
+                document.getElementById("previewContainer").classList.remove("hidden");
+            };
+            reader.readAsDataURL(file);
+
+            const formData = new FormData(document.getElementById("uploadForm"));
+            fetch("/", {
+                method: "POST",
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                renderChart(data.predictions);
+            });
+        });
+
+        function renderChart(predictions) {
+            const container = document.getElementById("previewContainer");
+
+            const oldCanvas = document.getElementById("chart");
+            if (oldCanvas) oldCanvas.remove();
+
+            const newCanvas = document.createElement("canvas");
+            newCanvas.id = "chart";
+            newCanvas.height = 200;
+            container.appendChild(newCanvas);
+
+            const ctx = newCanvas.getContext("2d");
+            chartInstance = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: predictions.map(p => p[0]),
+                    datasets: [{
+                        label: "Confidence (%)",
+                        data: predictions.map(p => p[1]),
+                        backgroundColor: predictions.map((p, i) => i === 0 ? "rgba(34,197,94,0.7)" : "rgba(59,130,246,0.7)"),
+                        borderRadius: 5,
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutBounce'
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js')
+    .then(() => console.log('SW registered'))
+    .catch(err => console.error('SW registration failed:', err));
+}
+
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  console.log('Install prompt available');
+
+  const installBtn = document.getElementById('install-btn');
+  installBtn.style.display = 'block';
+
+  installBtn.addEventListener('click', () => {
+    installBtn.style.display = 'none';
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(choiceResult => {
+      console.log('User choice:', choiceResult);
+      deferredPrompt = null;
+    });
+  });
+});
+</script>
+
+
+    <button id="install-btn" style="display:none;">Install App</button>
 </body>
 </html>
