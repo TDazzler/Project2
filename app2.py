@@ -7,6 +7,10 @@ from werkzeug.utils import secure_filename
 from PIL import Image
 from flask import send_from_directory
 from flask import jsonify
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, classification_report
+
+import pandas as pd
+import matplotlib.pyplot as plt
 
 
 app = Flask(__name__)
@@ -16,7 +20,9 @@ app.config['UPLOAD_FOLDER'] = 'uploads'
 class_names = ['Australian terrier', 'Beagle', 'Border terrier', 'Dingo', 'English foxhound', 'Golden retriever', 'Old English sheepdog', 'Rhodesian ridgeback', 'Samoyed', 'Shih-Tzu']
 
 image_size = (224, 224)
-model = keras.models.load_model("save_at_27.keras")
+model = keras.models.load_model("final_model.keras")
+
+
 
 
 @app.route('/manifest.json')
