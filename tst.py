@@ -24,7 +24,6 @@ data_dir = pathlib.Path('dataset')
 class_names = ['Australian terrier', 'Beagle', 'Border terrier', 'Dingo', 'English foxhound', 'Golden retriever', 'Old English sheepdog', 'Rhodesian ridgeback', 'Samoyed', 'Shih-Tzu']
 
 
-# Get folder names and count images
 folders = os.listdir('dataset')
 image_counts = []
 random_images = []
@@ -36,7 +35,6 @@ for folder in folders:
         image_counts.append(len(images))
 
 
-# Create bar chart with Plotly
 fig = go.Figure([go.Bar(x=folders, y=image_counts, marker_color='blue')])
 fig.update_layout(title='Image Count per Folder', xaxis_title='Dog Breed', yaxis_title='Number of Images')
 fig.show()
@@ -44,7 +42,6 @@ fig.show()
 
 model = keras.models.load_model("final_model.keras")
 
-# Recreate your validation dataset
 val_ds = tf.keras.preprocessing.image_dataset_from_directory(
     'dataset',
     validation_split=0.2,
@@ -77,12 +74,10 @@ report_dict = classification_report(y_true, y_pred, target_names=class_names, ou
 
 report_df = pd.DataFrame(report_dict).transpose()
 
-# Keep only class rows (exclude accuracy, macro avg, etc. if you want)
 metrics_df = report_df.loc[class_names, ['precision', 'recall', 'f1-score']]
 
 # Round and format nicely
 metrics_df = metrics_df.round(2)
 print(metrics_df)
 
-# Optional: Save to CSV or LaTeX for use in your report
 metrics_df.to_csv("classification_metrics.csv")
