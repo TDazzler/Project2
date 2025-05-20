@@ -12,10 +12,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- PWA Meta Tags -->
-<link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-<link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
-<meta name="theme-color" content="#3B82F6">
-
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+    <meta name="theme-color" content="#3B82F6">
 </head>
 <body class="bg-gray-100 text-gray-800 p-4">
 
@@ -30,7 +29,7 @@
         </div>
     </div>
 
-    
+    <button id="install-btn" class="mt-6 w-full bg-green-600 text-white py-2 px-4 rounded-lg shadow hidden">Install App</button>
 
     <script>
         let chartInstance = null;
@@ -103,32 +102,33 @@
 
         // Register service worker
         if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js')
-    .then(() => console.log('SW registered'))
-    .catch(err => console.error('SW registration failed:', err));
-}
+            navigator.serviceWorker.register('/sw.js')
+                .then(() => console.log('SW registered'))
+                .catch(err => console.error('SW registration failed:', err));
+        }
 
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  console.log('Install prompt available');
+        // Install button behavior for mobile
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        let deferredPrompt;
 
-  const installBtn = document.getElementById('install-btn');
-  installBtn.style.display = 'block';
+        window.addEventListener('beforeinstallprompt', (e) => {
+            if (!isMobile) return;
+            e.preventDefault();
+            deferredPrompt = e;
+            setTimeout(() => {
+        const installBtn = document.getElementById('install-btn');
+        installBtn.classList.remove('hidden');
 
-  installBtn.addEventListener('click', () => {
-    installBtn.style.display = 'none';
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(choiceResult => {
-      console.log('User choice:', choiceResult);
-      deferredPrompt = null;
-    });
-  });
+        installBtn.addEventListener('click', () => {
+            installBtn.classList.add('hidden');
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then(choiceResult => {
+                console.log('User choice:', choiceResult);
+                deferredPrompt = null;
+            });
+        });
+    }, 1000); // Delay for 1 second
 });
-</script>
-
-
-    <button id="install-btn" style="display:none;">Install App</button>
+    </script>
 </body>
 </html>
